@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Botones para copiar texto al portapapeles</title>
+    <style>
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Clases para la prueba de programacion</h1>
+<p>Haz click en un boton para copiar el texto correspondiente al portapapeles:</p>
+<button class="btn" onclick="copyToClipboard(NodeTree)">Copiar clase NodeTree</button>
+<button class="btn" onclick="copyToClipboard(BinarySearchTree)">Copiar clase BinarySearchTree</button>
+<button class="btn" onclick="copyToClipboard(Main)">Copiar clase Main</button>
+
+<p id="nodeTree">Node Tree</p>
+<p id="binarySearchTree">Node Tree</p>
+<p id="main">Node Tree</p>
+
+<script>
+
+    const p1 = document.getElementById("nodeTree")
+    const p2 = document.getElementById("binarySearchTree")
+    const p3 = document.getElementById("main")
+
+    let NodeTree = `public class NodeTree<T extends Comparable<T>> {
+
+    private T element;
+    private NodeTree<T> parent;
+    private NodeTree<T> left;
+    private NodeTree<T> right;
+
+    public NodeTree(T element) {
+        this.element = element;
+    }
+
+    public T getElement() {
+        return element;
+    }
+
+    public void setElement(T element) {
+        this.element = element;
+    }
+
+    public NodeTree<T> getParent() {
+        return parent;
+    }
+
+    public void setParent(NodeTree<T> parent) {
+        this.parent = parent;
+    }
+
+    public NodeTree<T> getLeft() {
+        return left;
+    }
+
+    public void setLeft(NodeTree<T> left) {
+        this.left = left;
+    }
+
+    public NodeTree<T> getRight() {
+        return right;
+    }
+
+    public void setRight(NodeTree<T> right) {
+        this.right = right;
+    }
+}`
+
+    let BinarySearchTree = `import java.util.ArrayList;
+
+public class BinarySearchTree<T extends Comparable<T>> {
+    private NodeTree<T> root;
+    private final int NODE_LEFT = 1;
+    private final int NODE_RIGHT = 2;
+    private final int NODES = 3;
+
+    public boolean isEmpty() {
+        return root == null;
+    }
+
+    public NodeTree<T> getRoot() {
+        return root;
+    }
+
+    public boolean isRoot(NodeTree<T> node) {
+        return root == node;
+    }
+
+    public boolean isLeaf(NodeTree<T> node) {
+        return node.getLeft() == null && node.getRight() == null;
+    }
+
+    public boolean isInternal(NodeTree<T> node) {
+        return !isLeaf(node);
+    }
+
+    /**
+     * Metodo add() recurisvo
+     */
+    public NodeTree<T> add(NodeTree<T> origin, T element) {
+
+        NodeTree<T> node = null;
+
+        if (root == null) {
+            root = new NodeTree<>(element);
+            node = root;
+        } else if (origin == null) {
+            System.out.println("Origin is null");
+        } else {
+
+            if (origin.getElement().compareTo(element) > 0) {
+
+                if (origin.getLeft() != null) {
+                    node = add(origin.getLeft(), element);
+                } else {
+                    node = new NodeTree<>(element);
+                    node.setParent(origin);
+                    origin.setLeft(node);
+                }
+            } else {
+
+                if (origin.getRight() != null) {
+                    node = add(origin.getRight(), element);
+                } else {
+                    node = new NodeTree<>(element);
+                    node.setParent(origin);
+                    origin.setRight(node);
+                }
+            }
+        }
+        return node;
+    }
+
+    public void preOrder(NodeTree<T> node) {
+
+        System.out.println(node.getElement().toString());
+
+        if (node.getLeft() != null) {
+            preOrder(node.getLeft());
+        }
+
+        if (node.getRight() != null) {
+            preOrder(node.getRight());
+        }
+    }
+
+    public void inOrder(NodeTree<T> node) {
+
+        if (node.getLeft() != null) {
+            inOrder(node.getLeft());
+        }
+
+        System.out.println(node.getElement().toString());
+
+        if (node.getRight() != null) {
+            inOrder(node.getRight());
+        }
+    }
+
+    public void postOrder(NodeTree<T> node) {
+
+        if (node.getLeft() != null) {
+            postOrder(node.getLeft());
+        }
+
+        if (node.getRight() != null) {
+            postOrder(node.getRight());
+        }
+
+        System.out.println(node.getElement().toString());
+    }
+
+    public int height(NodeTree<T> node) {
+        int height = 0;
+
+        if (isInternal(node)) {
+
+            if (node.getLeft() != null) {
+                height = Math.max(height, height(node.getLeft()));
+            }
+
+            if (node.getRight() != null) {
+                height = Math.max(height, height(node.getRight()));
+            }
+
+            height++;
+        }
+
+        return height;
+    }
+
+    public int depth(NodeTree<T> node) {
+        int depth = 0;
+
+        if (node != getRoot()) {
+            depth = 1 + depth(node.getParent());
+        }
+
+        return depth;
+    }
+
+    public void remove(NodeTree<T> node) {
+
+        if (root == null) {
+            System.out.println("Nothing to delete");
+        } else if (isLeaf(node)) {
+            removeLeaf(node);
+        } else if (node.getRight() != null && node.getLeft() == null) {
+            removeWithChild(node, NODE_RIGHT);
+        } else if (node.getRight() == null && node.getLeft() != null) {
+            removeWithChild(node, NODE_LEFT);
+        } else {
+            removeWithChild(node, NODES);
+        }
+    }
+
+    private void removeLeaf(NodeTree<T> node) {
+
+        if (isRoot(node)) {
+            root = null;
+        } else {
+
+            NodeTree<T> parent = node.getParent();
+
+            if (parent.getLeft() == node) {
+                parent.setLeft(null);
+            }
+
+            if (parent.getRight() == node) {
+                parent.setRight(null);
+            }
+        }
+    }
+
+    private void removeWithChild(NodeTree<T> node, int nodeType) {
+        NodeTree<T> next = null;
+
+        switch (nodeType) {
+            case NODE_LEFT -> next = node.getLeft();
+            case NODE_RIGHT -> next = minSubTree(node.getRight());
+            case NODES -> {
+                next = minSubTree(node.getRight());
+                if (!isRoot(next.getParent())) {
+
+                    node.getLeft().setParent(next);
+                    node.getRight().setParent(next);
+
+                    if (next.getParent().getLeft() == next) {
+                        next.getParent().setLeft(null);
+                    } else if (next.getParent().getRight() == next) {
+                        next.getParent().setRight(null);
+                    }
+                }
+            }
+        }
+
+        assert next != null;
+        next.setParent(node.getParent());
+
+        if (!isRoot(node)) {
+
+            if (node.getParent().getLeft() == node) {
+                node.getParent().setLeft(next);
+            } else if (node.getParent().getRight() == node) {
+                node.getParent().setRight(next);
+            }
+
+        } else {
+            root = next;
+        }
+
+        if (node.getRight() != null && node.getRight() != next) {
+            next.setRight(node.getRight());
+        }
+
+        if (node.getLeft() != null && node.getLeft() != next) {
+            next.setLeft(node.getLeft());
+        }
+    }
+
+    private NodeTree<T> minSubTree(NodeTree<T> node) {
+
+        if (node != null && node.getLeft() != null) {
+            while (!isLeaf(node)) {
+                node = minSubTree(node.getLeft());
+            }
+        }
+
+        return node;
+    }
+
+    public NodeTree<T> getNode(NodeTree<T> node, T element) {
+
+        NodeTree<T> aux = null;
+
+        if (node.getElement().compareTo(element) == 0) {
+            aux = node;
+        } else {
+
+            if (node.getLeft() != null) {
+                aux = getNode(node.getLeft(), element);
+            }
+
+            if (node.getRight() != null) {
+                aux = getNode(node.getRight(), element);
+            }
+
+        }
+
+        return aux;
+    }
+
+    public T getElement(NodeTree<T> node, T element) {
+
+        NodeTree<T> aux = getNode(node, element);
+
+        if (aux == null) {
+            return null;
+        }
+
+        return aux.getElement();
+    }
+
+    public void getNodes(NodeTree<T> node, T element, ArrayList<NodeTree<T>> nodesList) {
+
+        if (node.getElement().compareTo(element) == 0) {
+            nodesList.add(node);
+        }
+
+        if (node.getLeft() != null) {
+            getNodes(node.getLeft(), element, nodesList);
+        }
+
+        if (node.getRight() != null) {
+            getNodes(node.getRight(), element, nodesList);
+        }
+
+    }
+
+    public ArrayList<T> getElements(NodeTree<T> node, T element) {
+        ArrayList<T> elements = new ArrayList<>();
+        ArrayList<NodeTree<T>> nodesList = new ArrayList<>();
+
+        getNodes(node, element, nodesList);
+
+        for (NodeTree<T> aux : nodesList) {
+
+            elements.add(aux.getElement());
+
+        }
+
+        return elements;
+    }
+}`
+
+    let Main = `import org.w3c.dom.Node;
+
+import java.util.ArrayList;
+
+public class Main {
+    public static void main(String[] args) {
+        BinarySearchTree<Integer> tree = new BinarySearchTree<>();
+
+        tree.add(tree.getRoot(), 8);
+
+        tree.add(tree.getRoot(), 4);
+        tree.add(tree.getRoot(), 10);
+        tree.add(tree.getRoot(), 12);
+        tree.add(tree.getRoot(), 1);
+
+        NodeTree<Integer> t = tree.add(tree.getRoot(), 9);
+        NodeTree<Integer> t1 = tree.add(tree.getRoot(), 13);
+        NodeTree<Integer> t2 = tree.add(tree.getRoot(), 90);
+        tree.add(tree.getRoot(), 12);
+
+        tree.remove(t1);
+
+        System.out.println("PreOrden:");
+        tree.preOrder(tree.getRoot());
+
+        System.out.println("InOrden");
+        tree.inOrder(tree.getRoot());
+
+        System.out.println("PostOrden");
+        tree.postOrder(tree.getRoot());
+
+        System.out.println("Altura de root: " + tree.height(tree.getRoot()));
+        System.out.println("Profundidad de root: " + tree.depth(tree.getRoot()));
+
+        try {
+            NodeTree<Integer> node = tree.getNode(tree.getRoot(), 90);
+            System.out.println("getNode: " + node.getElement());
+        } catch (Exception e) {
+            System.out.println("No se encuentra ese nodo");
+        }
+
+        Integer element = tree.getElement(tree.getRoot(), 10);
+        System.out.println("getElement: " + element);
+
+        ArrayList<NodeTree<Integer>> nodes = new ArrayList<>();
+        tree.getNodes(tree.getRoot(), 12, nodes);
+
+        for (NodeTree<Integer> aux : nodes) {
+            System.out.println("Node: " + aux.getElement());
+        }
+
+        ArrayList<Integer> elements = tree.getElements(tree.getRoot(), 12);
+        for (Integer aux: elements){
+            System.out.println("Element: " + aux);
+        }
+    }
+}`
+
+    p1.innerText = NodeTree
+    p2.innerText = BinarySearchTree
+    p3.innerText = Main
+
+    function copyToClipboard(text) {
+        // Crea un elemento de texto y lo agrega al DOM
+        var textElement = document.createElement('textarea');
+        textElement.value = text;
+        document.body.appendChild(textElement);
+
+        // Selecciona el texto y lo copia al portapapeles
+        textElement.select();
+        document.execCommand('copy');
+
+        // Remueve el elemento de texto del DOM
+        document.body.removeChild(textElement);
+
+        // Muestra un mensaje de confirmación
+        alert('El texto "' + text + '" ha sido copiado al portapapeles');
+    }
+</script>
+</body>
+</html>
